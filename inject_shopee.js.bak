@@ -72,53 +72,6 @@ function convertSize(osize,type, to){
 	return osize;
 }
 var DXM_TRANSLATE_URL = "//translate.dianxiaomi.com/translate.json";
-var BING_TRANSLATE_URL = "//api.microsofttranslator.com/V2/Ajax.svc/Translate?appid=";
-function injectBingTranslate(str, callback, options, from, to){
-	var s = "";
-	if(str != undefined && str != ""){
-		str = $.trim(str);
-		if(str.length > 5000){
-			$.fn.message({type:"error",msg:"超过了翻译的最大字数限制"});
-			return callback(s, options);
-		}
-		// 包含中文的时候才进行翻译
-		if(!isContainChinese(str)){
-			return callback(s, options);
-		}
-		//str = encodeURIComponent(str);
-		var url = BING_TRANSLATE_URL;
-		if(from == undefined || from.trim() == ""){
-			from = "zh-Hans";
-		}
-		if(to == undefined || to.trim() == ""){
-			to = "en";
-		}
-		url += "&text="+str+"&from="+from+"&to="+to;
-		$.ajax({
-	        type : "get",
-	        url : url,
-	        dataType: "jsonp",
-	        jsonp:"oncomplete",
-	        success : function(data){
-	        	if(data != null){
-	        		// 如果属性，证明请求失败
-	        		console.log("injectBingTranslate:"+str+" "+JSON.stringify(data));
-	        		callback(data, options);
-	        	}else{
-	        		$.fn.message({type:"error",msg:"data is null"});
-	        		callback(null);
-	        	}
-	        },
-	        error:function(XMLHttpRequest, textStatus, errorThrown){
-	        	console.log(XMLHttpRequest);
-	        	console.log(textStatus);
-	        	console.log(errorThrown);
-	        	$.fn.message({type:"error",msg:"网络连接超时，请稍后再试！"+errorThrown.toString()});
-	        	callback(null);
-	        }
-	    });
-	}
-}
 function injectDxmTranslate(str, callback, options,from,to){
 	var s = "";
 	if(str != undefined && str != ""){
@@ -148,24 +101,17 @@ function injectDxmTranslate(str, callback, options,from,to){
 	        			callback(data.data, options);
 	        		}else{
 	        			$.fn.message({type:"error",msg:data.msg});
-	        			callback(null);
 	        		}
-	        	}else{
-	        		$.fn.message({type:"error",msg:"data is null"});
-	        		callback(null);
 	        	}
 	        },
 	        error:function(err){
-	        	$.fn.message({type:"error",msg:"网络连接超时，请稍后再试！"+err.toString()});
-	        	callback(null);
+	        	$.fn.message({type:"error",msg:"网络连接超时，请稍后再试！"});
 	        }
 	    });
 	}
 }
 function translate(str, callback, options,from,to){
-	//injectDxmTranslate(str, callback, options,from,to);
-	//injectBingTranslate(str, callback, options, from, to);
-	injectBingTranslate(str, callback, options, config_app.getTranslateFrom, config_app.getTranslateTo);
+	injectDxmTranslate(str, callback, options,from,to);
 }
 
 var keyTranslate_inject = function(){
@@ -183,26 +129,12 @@ var keyTranslate_inject = function(){
         return ;
     }
 
-   //if(site == "MY" || site == "SG"){
-   		var blacklist = config_app.getBlacklist;
-   		if(blacklist != undefined){
-   			var blacklists = blacklist.split(/[,，]/);
-   			if(blacklists != undefined && blacklists.length > 0){
-   				for(let index = 0 ; index < blacklists.length ; ++index){
-   					productName = productName.replace(blacklists[index], "");
-   					desc = desc.replace(blacklists[index], "");
-   				}
-   			}
-   		}
+   if(site == "MY" || site == "SG"){
    		function translateProductName(){
    			translate(productName, function(data){
 	           if(data && data != ""){
 	               $("#productName").val(data);
-	               if("en" == config_app.getTranslateTo){
-	               		deleteEngToMax("productName");
-	               }else{
-	               		deleteFtToMax("productName");
-	               }
+	               deleteEngToMax("productName");
 	               numberStatistics1();
 	           }else{
 	           		setTimeout(function(){
@@ -227,40 +159,40 @@ var keyTranslate_inject = function(){
 		};
 		translateDesc();
        
-    //}
+    }
 
     //简译繁
-//  if(site == 'TW'){
-//  	function translateFtProductName(){
-//  		translate(productName, function(data){
-//	            if(data && data != ""){
-//	                $("#productName").val(data);
-//	                deleteFtToMax("productName");
-//	                numberStatistics1();
-//	            }else{
-//	            	setTimeout(function(){
-//	           			translateFtProductName();
-//	           		}, 0);
-//	            }
-//	        },'','zh','ft');
-//  	}
-//      translateFtProductName();
-//
-//		function translateFtDesc(){
-//			translate(desc, function(data){
-//	            if(data && data != ""){
-//	                $("#description").val(data);
-//	                deleteFtToMax("description");
-//	                numberStatistics2();
-//	            }else{
-//	            	setTimeout(function(){
-//	           			translateFtDesc();
-//	           		}, 0);
-//	            }
-//	        },'','zh','ft');
-//		}
-//      translateFtDesc();
-//  }
+    if(site == 'TW'){
+    	function translateFtProductName(){
+    		translate(productName, function(data){
+	            if(data && data != ""){
+	                $("#productName").val(data);
+	                deleteFtToMax("productName");
+	                numberStatistics1();
+	            }else{
+	            	setTimeout(function(){
+	           			translateFtProductName();
+	           		}, 0);
+	            }
+	        },'','zh','ft');
+    	}
+        translateFtProductName();
+
+		function translateFtDesc(){
+			translate(desc, function(data){
+	            if(data && data != ""){
+	                $("#description").val(data);
+	                deleteFtToMax("description");
+	                numberStatistics2();
+	            }else{
+	            	setTimeout(function(){
+	           			translateFtDesc();
+	           		}, 0);
+	            }
+	        },'','zh','ft');
+		}
+        translateFtDesc();
+    }
 };
 
 
@@ -327,23 +259,6 @@ if(radiobox[0].checked){
 	var count = 0;	//count color number that already translated;
 	var skuCount = 0; //count sku number that already add to skuTable;
 	
-	var skuTable = document.getElementById("skuListTable");
-	var skuBody = skuTable.getElementsByTagName("tbody");
-	var skuArr = document.getElementById('skus');
-	if(skuArr != undefined){
-		skuArr.value = '[]';
-	}
-	console.log("skuBody size:"+skuBody.length);
-	if(skuBody.length > 0){
-		var childNodes = skuBody[0].childNodes;
-		setTimeout(function(){
-			while(childNodes.length > 1){
-				console.log("childNodes length:"+childNodes.length);
-				skuBody[0].removeChild(childNodes[1]);
-			}
-		}, 0);
-	}
-	
 	function isAllAsc(str){
 		if(str != undefined && 'string' == typeof(str)){
 			for(let index = 0 ; index < str.length; ++index){
@@ -355,25 +270,27 @@ if(radiobox[0].checked){
 		return true;
 	}
 	function translateItemColors(itemColor, callback){
-		translate(itemColor.name, function(data){
+		translate("颜色："+itemColor.name, function(data){
 			if(data && data != ''){
-				//var data =  data.substring(pos+1, data.length).trim();
-				data = data.trim();
-				var words = data.split(" ");	
-				data = "";
-				var index = 0; 
-				for(index = 0 ; index < words.length; ++index){
-					data += words[index].firstUpperCase();
+				var pos = data.indexOf(":");
+				if(pos >= 0){
+					var data =  data.substring(pos+1, data.length).trim();
+					var words = data.split(" ");	
+					data = "";
+					var index = 0; 
+					for(index = 0 ; index < words.length; ++index){
+						data += words[index].firstUpperCase();
+					}
+					
+					//var pos_end = data.indexOf(" ");
+					//if(pos_end < 0){
+					//	pos_end = data.length;
+					//}
+					//data = data.substring(0, pos_end).trim();
+					//data = data.firstUpperCase();
+					console.log("data:"+data);
+					itemColor.tname = data;
 				}
-				
-				//var pos_end = data.indexOf(" ");
-				//if(pos_end < 0){
-				//	pos_end = data.length;
-				//}
-				//data = data.substring(0, pos_end).trim();
-				//data = data.firstUpperCase();
-				console.log("data:"+data);
-				itemColor.tname = data;
 				callback();
 			}else{
 				setTimeout(function(){
@@ -456,10 +373,61 @@ if(radiobox[0].checked){
 	function stepAddAllToSku(){
 		console.log("on stepAddAllToSku");
 		setTimeout(function(){
-			addAllToSku();
+			
+			$(document).ready(function(){
+				var skuTable = document.getElementById("skuListTable");
+				var skuBody = skuTable.getElementsByTagName("tbody");
+				var skuArr = document.getElementById('skus');
+				if(skuArr != undefined){
+					console.log("skuArr.value:"+skuArr.value);
+					skuArr.value = '[]';
+				}
+				console.log("skuBody size:"+skuBody.length);
+				if(skuBody.length > 0){
+					var childNodes = skuBody[0].childNodes;
+					while(childNodes.length > 1){
+						console.log("childNodes length:"+childNodes.length);
+						skuBody[0].removeChild(childNodes[1]);
+					}
+				}
+				
+				addAllToSku();
+			})
+			
 		}, 0);
 	}
 	
+	//if(itemColors != undefined){
+	//	itemColors = itemColors.value;
+	//	
+	//	if(itemSizes == undefined){
+	//		itemSizes = [{name:"", tname:""}];
+	//	}else{
+	//		itemSizes = itemSizes.value;
+	//	}
+	//	
+	//	var count = 0;
+	//	function translateCallback(){
+	//		count += 1;
+	//		if(count >= itemColors.length){
+	//			addAllToSku();
+	//		}
+	//	}
+	//	for(index = 0 ; index < itemColors.length; ++index){
+	//		translateItemColors(itemColors[index], translateCallback);
+	//	}	
+	//}else if(itemSizes != undefined){
+	//	itemColors = [{name:"", tname:""}];
+	//	itemSizes = itemSizes.value;
+	//	addAllToSku();
+	//}else{
+	//	setStocksTips("商品已下架");
+	//	
+	//	itemSizes[index2].tname = asc(itemSizes[index2].name);
+	//		if("" == itemSizes[index2].tname.trim()){
+	//			itemSizes[index2].tname = itemSizes[index2].name;
+	//		}
+	//}
 	
 	function setStocksTips(tips){
 		var priceAndStocks = document.getElementsByClassName("sku-con");

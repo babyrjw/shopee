@@ -2,12 +2,19 @@
   "name": "1688 To Shopee Tool",
   "version": "1.0.1",
   "description": "sync data from 1688 to shopee!",
-  "permissions": ["activeTab", "declarativeContent", "storage","tabs",  "http://*/", "https://*/"],
+  "permissions": ["activeTab",
+								  "declarativeContent", 
+								  "storage",
+								  "tabs",
+								  "webRequest",
+								  "webRequestBlocking",
+								  "http://*/",
+								  "https://*/"],
   "web_accessible_resources": ["inject_alibaba.js","inject_shopee.js"],
   "options_page": "options.html",
   "background": {
     "scripts": ["background.js"],
-    "persistent": false
+    "persistent": true
   },
   "page_action": {
     "default_popup": "popup.html",

@@ -1,3 +1,12 @@
+var all_config_name = ["getAlibaba", 
+						"autoFillSkuid", 
+						"getPriceDelta", 
+						"getExchangeRate", 
+						"getExpress",
+						"getConvertShoeSize", 
+						"getTranslateFrom",
+						"getTranslateTo",
+						"getBlacklist"];
 function finishPackAndTrans(express){
 	let weightInput = document.getElementById("productWeight");
 	weightInput.value = 1;
@@ -42,7 +51,7 @@ function addSyncButton(){
 			console.log(response);
 			document.body.setAttribute("detail", JSON.stringify(response));
 			if(response){
-				chrome.storage.sync.get(null, function(result){
+				chrome.storage.sync.get(all_config_name, function(result){
 					document.body.setAttribute("config_app", JSON.stringify(result));
 					loadScript(uri("inject_shopee.js"));
 				})
@@ -65,7 +74,7 @@ function autoOpenAnalysis(){
 			console.log(response);
 			document.body.setAttribute("detail", JSON.stringify(response));
 			if(response){
-				chrome.storage.sync.get(null, function(result){
+				chrome.storage.sync.get(all_config_name, function(result){
 					console.log("result express:"+result);
 					finishPackAndTrans(result.getExpress);
 					document.body.setAttribute("config_app", JSON.stringify(result));

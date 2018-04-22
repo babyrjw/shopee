@@ -12,7 +12,10 @@ chrome.runtime.onInstalled.addListener(function() {
   	getPriceDelta:0, 
   	getExchangeRate:1,
   	getExpress:0,
-  	getConvertShoeSize:'1'
+  	getConvertShoeSize:'1',
+  	getTranslateFrom:'zh-Hans',
+  	getTranslateTo:'en',
+  	getBlacklist:''
   }, function() {
     //console.log("getAlibaba is true");
   });
@@ -66,3 +69,13 @@ console.log("set onMessage listener");
   	}
   }
 });
+
+chrome.webRequest.onBeforeSendHeaders.addListener(
+  function(details) {
+  	console.log(details);
+    
+    return { requestHeaders: details.requestHeaders };
+  },
+  {urls: ["<all_urls>"]},
+  [ 'blocking', 'requestHeaders']
+);
